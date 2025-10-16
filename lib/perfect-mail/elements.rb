@@ -20,9 +20,11 @@ class Element
       .join(' ')
     end
 
+
     attr_reader :pmail # instance PMail
     attr_reader :tag # body, section, column, etc.
     attr_reader :attrs # après le "|"
+    attr_reader :data # les attributs en table
     attr_accessor :value
     attr_reader :children
 
@@ -38,6 +40,16 @@ class Element
 
     def parse(line)
       @tag, @attrs = line.split('|').map{|s| s.strip}
+      parse_attrs
+    end
+
+    def parse_attrs
+      @data = {}
+      return if attrs.nil? || attrs.strip == ''
+      attrs.split(';').each do |paire|
+        prop, value = paire.split('=').map{|s| s.strip}
+        @data.store(prop.to_sym, value)
+      end
     end
 
     def to_mjml_prop(prop)
@@ -131,8 +143,8 @@ class Element
     end
 
     def add_line(line)
-      puts "\n-> Section.add_line avec '#{line}'"
-      puts "Nombre de colonnes = #{@columns.count}"
+      # puts "\n-> Section.add_line avec '#{line}'"
+      # puts "Nombre de colonnes = #{@columns.count}"
       # Si line commence par 'column', c'est la définition d'une
       # colonne, sinon, c'est forcément un élément dans une 
       # colonne unique qui n'est pas indiquée
@@ -155,7 +167,7 @@ class Element
     end
 
     def to_mjml
-      puts "-> Section.to_mjml avec #{columns.count} colonnes."
+      # puts "-> Section.to_mjml avec #{columns.count} colonnes."
       [
         '<mj-section>',
         columns.map {|c| c.to_mjml },
@@ -168,7 +180,7 @@ class Element
     def initialize(pmail, attrs); super end
 
     def to_mjml
-      puts "-> Column.to_mjml avec #{children.count} enfants."
+      # puts "-> Column.to_mjml avec #{children.count} enfants."
       c = []
       c << entete_mjml
       children.map do |child|
@@ -196,13 +208,20 @@ class Element
         if props.nil?
           tag, *props = tag.split(':').map { |s| s.strip }
           props = props.join(':')
+        elsif tag.match?(/^([a-z]+)\:/)
+          tag, *xprops = tag.split(':').map { |s| s.strip }
+          if tag == 'img'
+            props += ";scr=#{xprops.join(':')}"
+          else
+            props += ';' + xprops.join(':')
+          end
         end
 
         classe = 
           case tag
           when 'txt', 'text'
             Text
-          when 'img' 
+          when 'img'
             Image
           else
             # Alors c'est un texte qui n'est pas introduit par txt:
@@ -214,6 +233,11 @@ class Element
     end
   end #/class << self
 
+  # ========================================================
+  #
+  # Classe pour les TEXTES
+  #
+  #
   class Text < AbstractElement
     attr_reader :value
 
@@ -259,11 +283,37 @@ class Element
     end
   end
 
+
+  ##
+  # =========================================================
+  #
+  # Pour les IMAGES
+  #
+  #
   class Image < AbstractElement
-    def src; @src ||= attrs[:src] end
-    def href; @href ||= attrs[:href] end
+
+    def initialize(pmail, attrs)
+      super
+      puts "Image Attrs = #{attrs.inspect}"
+      puts "Image data = #{data.inspect}"
+    end
+
+    def to_html
+      '<img src="data:image/png;base64,%s">' % [base64_encoded]
+    end
+
+    def base64_encoded
+      Base64.strict_encode64(File.binread(src))
+    end
+
+    def src; @src ||= data[:src] end
+    def href; @href ||= data[:href] end
     def to_mjml
-      ['<mj-image src="%s" %s/>' % [src, attrs]]
+      if File.size(src) > 30_000
+        ['<mj-image src="%s" %s/>' % [src, attrs]]
+      else
+        [to_html]
+      end
     end
   end
 

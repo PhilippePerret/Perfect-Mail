@@ -8,8 +8,8 @@
 <mj-body>
 <mj-section>
 <mj-column>
-<mj-text mj-class="p">Ceci est un texte dans le style de p.</mj-text>
-<mj-text mj-class="o">Ceci est un autre texte dans le style de o.</mj-text>
+<mj-text>p</mj-text>
+<mj-text>o</mj-text>
 </mj-column>
 </mj-section>
 </mj-body>

@@ -22,6 +22,8 @@ class Builder
     puts "Code construit avec succès. Colle-le quelque part".green
     if options[:mail_app]
       produce_mail_app_mail
+      puts "Mail pour Mail.app construit avec succès".green
+      `open -a Mail.app "#{eml_path}"`
     end
   end
 
