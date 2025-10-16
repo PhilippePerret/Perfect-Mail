@@ -8,7 +8,8 @@ class Element
   class AbstractElement
 
     def self.formate_attrs(instance, attrs)
-      attrs = attrs
+      return '' if attrs.nil? || attrs.strip == ''
+      attrs = ' ' + attrs
       .split(';')
       .reject{|defprop| defprop.strip == ''}
       .map do |defprop|
@@ -99,7 +100,7 @@ class Element
       puts "paire = #{paire.inspect}"
       name, attrs = paire
       attrs = AbstractElement.formate_attrs(self, attrs)
-      '<mj-class name="%s" %s />' % [name, attrs]
+      '<mj-class name="%s"%s />' % [name, attrs]
     end
 
     def to_mjml_prop(prop)
@@ -178,21 +179,31 @@ class Element
     end
 
     def entete_mjml
-      unless attrs.nil? || attrs == ''
-        attrs = " #{AbstractElement.formate_attrs(self, attrs)}"
-      end
-      '<mj-column%s>' % [attrs]
+      '<mj-column%s>' % [AbstractElement.formate_attrs(self, attrs)]
     end
   end
 
 
   class AnyElement < AbstractElement
     class << self
+
+      # +tag+ et +props+ ont été découpés selon le "|". Donc
+      # si c'est un paragraphe, dans tag, il y a 'txt' par
+      # exemple et 'img' dans une image.
+      #
       def create(pmail, tag, props)
+        puts "tag: '#{tag}' / props: '#{props}'"
+        if props.nil?
+          tag, *props = tag.split(':').map { |s| s.strip }
+          props = props.join(':')
+        end
+
         classe = 
           case tag
-          when 'txt' then Text
-          when 'img' then Image
+          when 'txt', 'text'
+            Text
+          when 'img' 
+            Image
           else
             # Alors c'est un texte qui n'est pas introduit par txt:
             props = tag
@@ -232,7 +243,7 @@ class Element
 
     def to_mjml
       return [
-        '<mj-text %s>%s</mj-text>' % [
+        '<mj-text%s>%s</mj-text>' % [
           AbstractElement.formate_attrs(self, attrs), 
           value
         ]

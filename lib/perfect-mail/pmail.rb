@@ -9,7 +9,6 @@ class PMAIL
   end #/class << self
 
   attr_reader :raw_code
-  attr_reader :styles
   attr_reader :sections
 
   ##
@@ -23,7 +22,7 @@ class PMAIL
   # @return true si le code mjml a besoin d'une entête
   # Pour le moment, c'est nécessaire lorsqu'il y a des styles
   def head?
-    @styles.any?
+    styles.any?
   end
 
   # @return les lignes pour définir le head
@@ -91,6 +90,12 @@ class PMAIL
   # mail, soit on le définit ici
   def body
     @body ||= MJML::Element::Body.new(self, '')
+  end
+
+  # L'élément Styles. Soit il a été défini au cours du parsing,
+  # soit on le définit ici
+  def styles
+    @styles ||= MJML::Element::Styles.new(self)
   end
 
 end #/class PMAIL
