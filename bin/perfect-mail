@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
+require 'bundler/setup'
+require_relative '../lib/perfect-mail'
 
-require_relative '../lib/required'
-
-PerfectMail.produce
+PerfectMail::CLI.run(ARGV)
