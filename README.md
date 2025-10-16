@@ -67,3 +67,33 @@ section |background-color:whitegrey;
 * ouvrez un Terminal et tapez `perfect-mail -c path/to/monMail.pmail`
 * => le code du mail est produit et mis dans le presse-papier
 * collez-le dans votre gestionnaire de mailing-list par exemple.
+
+---
+
+## Mode d’emploi
+
+Un mail définit plusieurs sections avec le mot-clé `section`.
+
+
+
+### Définition des styles
+
+On peut définir les styles généraux au début du mail par la balise `styles` :
+
+~~~txt
+styles
+	p: color:blue; size:18pt; 
+	psmall: size:11pt;
+	
+~~~
+
+
+
+## Options de commande
+
+| Option          | Description                                                  | Note |
+| --------------- | ------------------------------------------------------------ | ---- |
+| `-m/--minified` | Minifie le code pour obtenir le code le plus condensé possible. |      |
+|                 |                                                              |      |
+|                 |                                                              |      |
+
