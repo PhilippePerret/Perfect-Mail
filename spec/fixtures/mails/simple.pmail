@@ -1,0 +1,6 @@
+styles
+  p: color:blue; size:12pt;
+  o: color:green; size:10pt;
+section
+  p::Ceci est un texte dans le style de p.
+  o::Ceci est un autre texte dans le style de o.
