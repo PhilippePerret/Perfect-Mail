@@ -38,21 +38,17 @@ class PMAIL
 
 
   def parse(code)
-    @root = {
-      body: nil,
-      head: nil,
-      sections: [],
-      styles: nil
-    }
+    @root = {body: nil, head: nil, styles: nil, sections: []}
     @current_node = nil
 
     code
     .gsub(/\r/,'')
     .split("\n")
     .each do |line|
+      line = line.strip # not mind indent
       kword, attrs = line.split(' ', 2)
       if KEYWORDS_ROOT_CONTAINERS[kword]
-        @current_node = make_node(KEYWORDS_ROOT_CONTAINERS[kword], nil, attrs)
+        @current_node = make_root_node(KEYWORDS_ROOT_CONTAINERS[kword], nil, attrs)
       elsif KEYWORDS_CONTAINERS[kword]
         @current_node = make_node(KEYWORDS_CONTAINERS[kword], nil, attrs)
       else
@@ -68,8 +64,10 @@ class PMAIL
           raise "Any current node. Code should start with body, or styles, or section without leading space."
         else
           # Simple line of text to add to current node
-          @current_node = make_node(KEYWORDS_ELEMENTS['txt'], kword, attrs)
-          @current_node.add_line(line)
+          # Note: In this case, value is in +kword+ (cf. parse_content_line)
+          puts "kword = #{kword.inspect}"
+          puts "value = #{value.inspect}"
+          @current_node = make_node(KEYWORDS_ELEMENTS['txt'], value, attrs)
         end
       end
     end
@@ -84,18 +82,20 @@ class PMAIL
     MJML::Element::AbstractElement.parse_content_line(line)
   end
 
-  def make_node(node_klass, value, attrs)
+  def make_root_node(node_klass, value, attrs)
     node = node_klass.new(self, value, attrs)
-    root_add(node) if node.root?
-    @current_node << node unless @current_node.nil?
+    if node.tag === 'section' 
+      @root[:sections] << node
+    else
+      @root.store(node.tag, node)
+    end
     return node
   end
 
-  def root_add(node)
-    case node.tag
-    when 'section' then @root[:sections] << node
-    else @root.store(node.tag, node)
-    end
+  def make_node(node_klass, value, attrs)
+    node = node_klass.new(self, value, attrs)
+    @current_node << node unless @current_node.nil?
+    return node
   end
 
 end #/class PMAIL

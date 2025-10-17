@@ -27,7 +27,7 @@ class Element
         kword, value = line.split(':', 2)
         value, attrs = value.split('|', 2)
       else
-        value = kword
+        value = line
       end
       [kword, value, attrs]
     end
@@ -46,6 +46,17 @@ class Element
       @value = value
       parse_raw_attrs(attrs)
       @children = []
+    end
+
+    def inspect
+      {
+        tag: tag,
+        root?: root?,
+        children: @children.map { |child| child.inspect },
+        attrs: attrs,
+        value: value,
+        eoh: 'EOH' # to visualize the end
+    }.inspect
     end
 
     def root?; false end
@@ -156,12 +167,18 @@ class Element
   class Section < AbstractElement
     def tag; 'section' end
     def root?; true end
-    def addlinable?; true end
+    def addlinable?; false end
 
-    def add_line(line)
-      kword, value, attrs = AbstractElement.parse_content_line(line)
-      @current_column ||= init_column
-      @current_column << Text.new(pmail, value, attrs)
+    # To add a Node (a column or a text, or a image)
+    # @params child {MJML::Element::Column|Text|Image}
+    def <<(child)
+      puts "child.tag = #{child.tag.inspect}"
+      if child.tag == 'column'
+        @children << child
+      else
+        @current_column ||= init_column
+        @current_column << child
+      end
     end
 
     # Init a new column (for a lonely text in a section with only
