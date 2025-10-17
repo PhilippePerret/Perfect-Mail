@@ -35,5 +35,16 @@ describe "Parser" do
       My first paragraph
       My second paragraph
     PMAIL
+  
+    r = PerfectMail::PMAIL.new(src).root
+    expect(r[:body]).to be_nil
+    expect(r[:styles]).to be_nil
+    expect(r[:head]).to be_nil
+    expect(r[:sections]).not_to be_nil
+    ss = r[:sections]
+    expect(ss.count).to be(1)
+    s1 = r[:sections][0]
+    expect(s1.children.count).to be(1)
+
   end
 end
