@@ -1,6 +1,7 @@
 require_relative 'utils/string_extension'
 require_relative 'cli'
-require_relative 'elements'
+require_relative 'mjml_elements'
 require_relative 'pmail'
 require_relative 'mjml'
 require_relative 'builder'
+require_relative 'pmail_parser'

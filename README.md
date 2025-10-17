@@ -87,7 +87,9 @@ styles
 	
 ~~~
 
+### Séparateurs d’attributs
 
+Les attributs sont toujours séparés par des « ; » (commen en CSS) et leur empreinte est `property=value;`
 
 ## Options de commande
 
