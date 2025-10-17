@@ -24,10 +24,19 @@ class Element
     def self.parse_content_line(line)
       kword = value = attrs = nil
       if line.match?(/^([a-z]+)\:/)
-        kword, value = line.split(':', 2)
+        kword, value = line.split(':', 2).map {|s| s.strip }
         value, attrs = value.split('|', 2)
+        # If kword is not a known keywords, it's the name of a class
+        unless PMAIL::KEYWORDS_ELEMENTS[kword] || PMAIL::KEYWORDS_ROOT_CONTAINERS[kword] || PMAIL::KEYWORDS_CONTAINERS[kword]
+          if attrs.nil?
+            attrs = ''
+          elsif !attrs.end_with?(';')
+            attrs += ';'
+          end
+          attrs += "style:#{kword};"
+        end
       else
-        value = line
+        value = line.strip
       end
       [kword, value, attrs]
     end
@@ -59,6 +68,13 @@ class Element
     }.inspect
     end
 
+    # === Volatile Properties ===
+
+    def src; @src ||= attrs[:src] end
+    def style; @style ||= attrs[:style] end
+
+    # === Predicates ===
+
     def root?; false end
     # @return True if element can receave raw lines of text
     def addlinable?; false end
@@ -74,7 +90,7 @@ class Element
       @attrs = {}
       return if raw_attrs.nil? || raw_attrs.strip == ''
       raw_attrs.split(';').each do |paire|
-        prop, value = paire.split('=').map{|s| s.strip}
+        prop, value = paire.split(/[=:]/).map{|s| s.strip}
         @attrs.store(prop.to_sym, value)
       end
     end
@@ -118,11 +134,12 @@ class Element
 
 
   ## ====================================
-  # Class for --- STYLE
+  # Class for --- STYLES
   #
   class Styles < AbstractElement
     def tag; 'styles' end
     def root?; true end
+    def addlinable?; true end
 
     def any?; @children.any? end
 
@@ -130,9 +147,9 @@ class Element
     # A line should always be a style definition. So a 
     # keyword (style name) and CSS's classes
     def add_line(line)
-      name, *attrs = line.split(':').map{|s| s.strip}
-      attrs = attrs.join(':')
-      @children << [name, attrs]
+      name, attrs = line.split(':', 2).map{|s| s.strip}
+      style = Style.new(pmail, name, attrs)
+      @children << style
     end
 
     def to_mjml
@@ -154,6 +171,18 @@ class Element
 
   end #/class MJML::Element::Styles
 
+  ## ====================================
+  # Class for --- STYLE
+  #
+  # A style
+  class Style < AbstractElement
+    def tag; 'style' end
+
+    def name; @value end
+  end
+
+
+
 
   ## ========================================================
   #
@@ -167,12 +196,19 @@ class Element
   class Section < AbstractElement
     def tag; 'section' end
     def root?; true end
-    def addlinable?; false end
+    def addlinable?; true end
+
+    # So a line unknowable (not a column), so a text
+    def add_line(line)
+      kword, value, attrs = AbstractElement.parse_content_line(line)
+      child = Text.new(pmail, value, attrs)
+      @current_column ||= init_column
+      @current_column << child
+    end
 
     # To add a Node (a column or a text, or a image)
     # @params child {MJML::Element::Column|Text|Image}
     def <<(child)
-      puts "child.tag = #{child.tag.inspect}"
       if child.tag == 'column'
         @children << child
       else
@@ -248,8 +284,6 @@ class Element
       .gsub(/__(.+?)__/, '<u>\1</u>')
       .gsub(/\-\-\-(.+?)\-\-\-/, '<stroke>\1</stroke>')
     end
-
-    def src; @src ||= attrs[:src] end
 
     def to_mjml
       return [

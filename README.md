@@ -82,7 +82,7 @@ On peut définir les styles généraux au début du mail par la balise `styles`�
 
 ~~~txt
 styles
-	p: color:blue; size:18pt; 
+	p: color:blue; size=18pt; 
 	psmall: size:11pt;
 	
 ~~~
@@ -90,6 +90,20 @@ styles
 ### Séparateurs d’attributs
 
 Les attributs sont toujours séparés par des « ; » (commen en CSS) et leur empreinte est `property=value;`
+
+On peut indifféremment utiliser le « `:` » ou le « `=` » pour affecter la valeur. Ces deux expressions sont similaires :
+
+~~~
+size=12px;
+
+size:12px;
+~~~
+
+
+
+### Commentaires
+
+On peut placer des commentaires dans le texte  à l’aide de la marque `//` ou `/* */` (comme en JavaScript).
 
 ## Options de commande
 

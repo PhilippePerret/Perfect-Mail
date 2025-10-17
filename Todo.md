@@ -1,6 +1,7 @@
 # Todo
 
-- [ ] Revoir le parsing, il n'est pas bon du tout… Alors que c'est simple. Par exemple, dès qu'on est dans les lignes d'une section, soit on a une colonne, soit on a un identifier qui peut être :
+- [ ] Revoir le `add_line` qui est mieux que la nouvelle méthode car la ligne doit être traitée différemment en fonction du container.
+- [x] Revoir le parsing, il n'est pas bon du tout… Alors que c'est simple. Par exemple, dès qu'on est dans les lignes d'une section, soit on a une colonne, soit on a un identifier qui peut être :
   - une image (img:)
   - un text (par défaut ou txt:)
   - une table (tbl:)
@@ -21,3 +22,8 @@
 - [x] produire le fichier MJML
 - [x] produire le fichier HTML
 - [x] Produire un mail pour Mail.app
+
+
+## Tests à implémenter
+
+- [ ] Affecter un style à un paragraphe (`sty: Mon paragraphe`) génère une alerte si le style n’existe pas.

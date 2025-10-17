@@ -43,9 +43,13 @@ class PMAIL
 
     code
     .gsub(/\r/,'')
+    .gsub(/\/\*(.+?)\*\//m, '')
+    .gsub(/\/\/(.+?)$/, '')
     .split("\n")
     .each do |line|
       line = line.strip # not mind indent
+      next if line.empty?
+      # puts "\nCURRENT LINE : #{line.inspect}"
       kword, attrs = line.split(' ', 2)
       if KEYWORDS_ROOT_CONTAINERS[kword]
         @current_node = make_root_node(KEYWORDS_ROOT_CONTAINERS[kword], nil, attrs)
@@ -56,18 +60,17 @@ class PMAIL
         kword, value, attrs = parse_content_line(line)
         if KEYWORDS_ELEMENTS[kword]
           # New node
-          @current_node = make_node(KEYWORDS_ELEMENTS[kword], value, attrs)
+          # Can't become a container node (not the @current_node)
+          make_node(KEYWORDS_ELEMENTS[kword], value, attrs)
+        elsif @current_node.nil?
+          raise "Any current node. Code should start with body, or styles, or section without leading space."
         elsif @current_node.addlinable?
           # If one can add line to current node
           @current_node.add_line(line)
-        elsif @current_node.nil?
-          raise "Any current node. Code should start with body, or styles, or section without leading space."
         else
           # Simple line of text to add to current node
-          # Note: In this case, value is in +kword+ (cf. parse_content_line)
-          puts "kword = #{kword.inspect}"
-          puts "value = #{value.inspect}"
-          @current_node = make_node(KEYWORDS_ELEMENTS['txt'], value, attrs)
+          # Note: Can't become a container node (not the @current_node)
+          make_node(KEYWORDS_ELEMENTS['txt'], value, attrs)
         end
       end
     end
@@ -87,7 +90,7 @@ class PMAIL
     if node.tag === 'section' 
       @root[:sections] << node
     else
-      @root.store(node.tag, node)
+      @root.store(node.tag.to_sym, node)
     end
     return node
   end
