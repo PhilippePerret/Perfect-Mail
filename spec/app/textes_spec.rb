@@ -1,5 +1,8 @@
 describe "Les textes " do
 
+  MJML = PerfectMail::MJML
+  PMAIL = PerfectMail::PMAIL
+
   def compare(src, dst)
     dst = dst.gsub(/^\s+/,'').strip
     unless dst.match?('<mj-body')
@@ -8,8 +11,14 @@ describe "Les textes " do
     unless dst.start_with?('<mjml>')
       dst = "<mjml>\n#{dst}\n</mjml>"
     end
-    actual = PerfectMail::MJML.pmail2mjml(src)
-    expect(actual.strip).to eq(dst.strip)
+    dst = dst.strip
+    actual = MJML.pmail2mjml(src).strip
+    puts "ACTUAL:\n#{actual}"
+    if actual != dst
+      puts "Code MJML différents. Résultat du parsing :".red
+      puts PMAIL.new(src).root.inspect.red
+    end
+    expect(actual).to eq(dst)
   end
 
   it "peuvent être sur une seule ligne, introduits par 'txt'" do
@@ -55,7 +64,55 @@ describe "Les textes " do
 
 
   it "peuvent être sur plusieurs lignes sur plusieurs colonnes" do
-    
+    src = <<~PMAIL
+
+    section
+      column
+        Un texte colonne 1.
+      column
+        Un texte colonne 2.
+    section
+      Un texte toute colonne.
+    section
+      column
+        Sur colonne 1.
+      column
+        Sur colonne 2.
+      column
+        Sur colonne 3.
+    PMAIL
+
+    dst = <<~MJML
+    <mj-section>
+      <mj-column>
+        <mj-text>Un texte colonne 1.</mj-text>
+      </mj-column>
+      <mj-column>
+        <mj-text>Un texte colonne 2.</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section>
+      <mj-column>
+        <mj-text>Un texte toute colonne.</mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section>
+      <mj-column>
+        <mj-text>Sur colonne 1.</mj-text>
+      </mj-column>
+      <mj-column>
+        <mj-text>Sur colonne 2.</mj-text>
+      </mj-column>
+      <mj-column>
+        <mj-text>Sur colonne 3.</mj-text>
+      </mj-column>
+    </mj-section>
+    MJML
+
+    compare(src, dst)
+
   end
     
 

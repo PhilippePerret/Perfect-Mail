@@ -185,4 +185,57 @@ describe "Parser" do
     expect(p4.value).to eq('Juste un texte.')
   end
 
+  it "reconnait une section à deux colonnes" do
+
+    src = <<~PMAIL
+
+    section
+      column
+        Un texte colonne 1.
+        Un deuxième texte colonne 1.
+      column
+        Un texte colonne 2.
+
+    PMAIL
+
+    r = PMAIL.new(src).root
+    expect_base(r, body: nil, head: nil, sections: 1)
+    s = r[:sections][0]
+    expect(s.children.count).to eq(2)
+    c1 = s.children[0]
+    c2 = s.children[1]
+    expect(c1).to be_instance_of(EL::Column)
+    expect(c2).to be_instance_of(EL::Column)
+    expect(c1.children.count).to eq(2) # 2 texts in column A
+    expect(c2.children.count).to eq(1) # 1 text in column 2
+    t1 = c1.children[0]
+    t2 = c1.children[1]
+    t3 = c2.children[0]
+    expect(t1).to be_instance_of(EL::Text)
+    expect(t2).to be_instance_of(EL::Text)
+    expect(t3).to be_instance_of(EL::Text)
+    expect(t1.value).to eq('Un texte colonne 1.')
+    expect(t2.value).to eq('Un deuxième texte colonne 1.')
+    expect(t3.value).to eq('Un texte colonne 2.')
+
+  end
+
+  it "reconnait une section à 3 colonnes" do
+    src = <<~PMAIL
+
+    section
+      column
+        Sur colonne 1.
+      column
+        Sur colonne 2.
+      column
+        Sur colonne 3.
+
+    PMAIL
+
+    r = PMAIL.new(src).root
+    expect_base(r, body: nil, head: nil, sections: 1)
+
+  end
+
 end

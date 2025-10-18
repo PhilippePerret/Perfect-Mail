@@ -39,7 +39,8 @@ class PMAIL
 
   def parse(code)
     @root = {body: nil, head: nil, styles: nil, sections: []}
-    @current_node = nil
+    @current_node     = nil
+    @current_section  = nil
 
     code
     .gsub(/\r/,'')
@@ -54,6 +55,7 @@ class PMAIL
       if KEYWORDS_ROOT_CONTAINERS[kword]
         @current_node = make_root_node(KEYWORDS_ROOT_CONTAINERS[kword], nil, attrs)
       elsif KEYWORDS_CONTAINERS[kword]
+        @current_node = @current_section
         @current_node = make_node(KEYWORDS_CONTAINERS[kword], nil, attrs)
       else
         # Contained Element
@@ -89,6 +91,7 @@ class PMAIL
     node = node_klass.new(self, value, attrs)
     if node.tag === 'section' 
       @root[:sections] << node
+      @current_section = node
     else
       @root.store(node.tag.to_sym, node)
     end

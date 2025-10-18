@@ -1,15 +1,9 @@
 <mjml>
-<mj-head>
-<mj-attributes>
-<mj-class name="p" color="blue" font-size="12pt" />
-<mj-class name="o" color="green" font-size="10pt" />
-</mj-attributes>
-</mj-head>
 <mj-body>
 <mj-section>
 <mj-column>
-<mj-text>p</mj-text>
-<mj-text>o</mj-text>
+<mj-text style="p">:Ceci est un texte dans le style de p.</mj-text>
+<mj-text style="o">:Ceci est un autre texte dans le style de o.</mj-text>
 </mj-column>
 </mj-section>
 </mj-body>

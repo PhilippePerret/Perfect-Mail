@@ -7,17 +7,17 @@ class Element
 
   class AbstractElement
 
+    # @return formatted attributes for mjml code
     def self.formate_attrs(instance, attrs)
-      return '' if attrs.nil? || attrs.strip == ''
-      attrs = ' ' + attrs
-      .split(';')
-      .reject{|defprop| defprop.strip == ''}
-      .map do |defprop|
-        prop, value = defprop.split(':').map { |s| s.strip }
-        prop = instance.to_mjml_prop(prop)
-        '%s="%s"' % [prop, value]
+      # puts "-> formate_attrs(attrs : #{attrs.inspect})"
+      return '' if attrs.nil? || attrs.empty?
+      attrs
+      .map do |k, v|
+        k = instance.to_mjml_prop(k)
+        '%s="%s"' % [k, v]
       end
       .join(' ')
+      .prepend(' ')
     end
 
     # Parse a raw text line (without leading word)
@@ -48,6 +48,7 @@ class Element
     attr_reader :attrs
     # {String} Value for contained element (p.e. text)
     attr_reader :value
+    # Node children
     attr_reader :children
 
     def initialize(pmail, value, attrs)
@@ -60,11 +61,11 @@ class Element
     def inspect
       {
         tag: tag,
-        root?: root?,
-        children: @children.map { |child| child.inspect },
+        # root?: root?,
+        :"children(#{children.count})" => children,
         attrs: attrs,
         value: value,
-        eoh: 'EOH' # to visualize the end
+        eoh: 'EOH' # to visualize end of hash
     }.inspect
     end
 
@@ -78,6 +79,9 @@ class Element
     def root?; false end
     # @return True if element can receave raw lines of text
     def addlinable?; false end
+
+    # @return True si node has children
+    def any?; children.any? end
 
     # To add a Node
     # @params child {MJML::Element::...}
@@ -97,7 +101,9 @@ class Element
 
     # Short CSS prop to real one
     def to_mjml_prop(prop)
-      case prop
+      # puts "-> to_mjml_prop(prop = #{prop.inspect})"
+      case prop.to_s
+      when 'style' then 'mj-class'
       when 'size', 'fsize' then 'font-size'
       when 'font', 'ffamily', 'family' then 'font-family'
       when 'align' then 'text-align'
@@ -141,8 +147,6 @@ class Element
     def root?; true end
     def addlinable?; true end
 
-    def any?; @children.any? end
-
     ##
     # A line should always be a style definition. So a 
     # keyword (style name) and CSS's classes
@@ -154,19 +158,9 @@ class Element
 
     def to_mjml
       c = ['<mj-attributes>']
-      children.each do |paire|
-        name, attrs = paire
-        c << to_class_def(paire)
-      end
+      c += children.map do |style| style.to_mjml end
       c << '</mj-attributes>'
       return c
-    end
-
-    def to_class_def(paire)
-      puts "paire = #{paire.inspect}"
-      name, attrs = paire
-      attrs = AbstractElement.formate_attrs(self, attrs)
-      '<mj-class name="%s"%s />' % [name, attrs]
     end
 
   end #/class MJML::Element::Styles
@@ -177,8 +171,13 @@ class Element
   # A style
   class Style < AbstractElement
     def tag; 'style' end
-
     def name; @value end
+
+    def to_mjml
+      fattrs = AbstractElement.formate_attrs(self, attrs)
+      '<mj-class name="%s"%s />' % [name, fattrs]
+    end
+
   end
 
 
@@ -227,7 +226,7 @@ class Element
       # puts "-> Section.to_mjml avec #{columns.count} colonnes."
       [
         '<mj-section>',
-        columns.map {|c| c.to_mjml },
+        children.map {|c| c.to_mjml },
         '</mj-section>'
       ].flatten
     end
@@ -276,9 +275,9 @@ class Element
     #   end
     # end
 
-    def formate(line)
+    def formate(str)
       # Un peu de markdown
-      line
+      str
       .gsub(/\*\*(.+?)\*\*/, '<strong>\1</strong>')
       .gsub(/\*(.+?)\*/, '<em>\1</em>')
       .gsub(/__(.+?)__/, '<u>\1</u>')
@@ -289,7 +288,7 @@ class Element
       return [
         '<mj-text%s>%s</mj-text>' % [
           AbstractElement.formate_attrs(self, attrs), 
-          value
+          formate(value)
         ]
       ]
     end

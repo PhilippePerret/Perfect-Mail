@@ -47,12 +47,17 @@ class PMAIL
   
   # The Body element. Defined during parsing or now.
   def body
-    @body ||= MJML::Element::Body.new(self)
+    @body ||= @root[:body] || MJML::Element::Body.new(self, nil, nil)
   end
 
   # The Styles element. Defined during parsing or now.
   def styles
-    @styles ||= MJML::Element::Styles.new(self)
+    @styles ||= @root[:styles] || MJML::Element::Styles.new(self, nil, nil)
+  end
+
+  # The Sections
+  def sections
+    @sections ||= root[:sections]
   end
 
 end #/class PMAIL
