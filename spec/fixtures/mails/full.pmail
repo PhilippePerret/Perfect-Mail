@@ -24,6 +24,6 @@ section
 
 section
   column
-    Ci-contre une image cliquable
+    img: www.atelier-icare.net/img/atelier/Icare/Icare-bigger.png | href=www.atelier-icare.net
   column
-    img: www.atelier-icare.net/img/atelier/icare/Icare-bigger.png | href=www.atelier-icare.net
+    Ci-contre une image cliquable

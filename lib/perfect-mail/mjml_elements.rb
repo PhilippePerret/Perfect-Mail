@@ -107,14 +107,18 @@ class Element
       @attrs = {}
       return if raw_attrs.nil? || raw_attrs.strip == ''
       raw_attrs.split(';').each do |paire|
-        prop, value = paire.split(/[=:]/,2).map{|s| s.strip}
+        prop, value = paire.splittrim(/[=:]/,2)
         @attrs.store(prop.to_sym, value)
       end
+      ensured_href # add protocole if needed
     end
 
     def formatted_attrs
       AbstractElement.formate_attrs(self, attrs)
     end
+
+    # Must be overridden
+    def ensured_href; end
 
     # Short CSS prop to real one
     def to_mjml_prop(prop)
@@ -381,6 +385,13 @@ class Element
         end
       end
     end
+
+    def ensured_href
+      if attrs.has_key?(:href)
+        @attrs.store(:href, "https://#{attrs[:href]}") unless attrs[:href].start_with?('http')
+      end
+    end
+
     def src; @src ||= value end
     def href; @href ||= attrs[:href] end
     def to_mjml

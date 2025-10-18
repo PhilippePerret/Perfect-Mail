@@ -21,10 +21,11 @@ describe "Images" do
   it "can be remotely defined" do
     src = <<~PMAIL
     section
-      img: www.atelier-icare.net/img/atelier/icare/Icare-bigger.png | href=www.atelier-icare.net
+      img: www.atelier-icare.net/img/atelier/Icare/Icare-bigger.png | href=www.atelier-icare.net
 
     PMAIL
     html = pmail2html(src)
     expect(html).to match(/<img.+?src="https:\/\/www\.atelier-icare/)
+    expect(html).to match(/<a href="https:\/\/www\.atelier\-icare/)
   end
 end
