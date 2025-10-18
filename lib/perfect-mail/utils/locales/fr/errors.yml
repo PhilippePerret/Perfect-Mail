@@ -1,0 +1,4 @@
+---
+0: "Merde, une erreur…"
+# Fontes
+1000: "La fonte '%s' doit définir son URL (`<Font Name>: <Font URL>`)."

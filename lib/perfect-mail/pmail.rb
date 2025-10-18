@@ -22,7 +22,7 @@ class PMAIL
 
   # @return true if mjml code needs an head
   def head?
-    styles.any?
+    styles.any? || fonts.any?
   end
 
   # @return {Array} lines'head
@@ -30,7 +30,8 @@ class PMAIL
   def head2mjml
     c = []
     c << '<mj-head>'
-    c << styles.to_mjml
+    c << styles.to_mjml if styles.any?
+    c << fonts.to_mjml if fonts.any?
     c << '</mj-head>'
     return c
   end
@@ -53,6 +54,10 @@ class PMAIL
   # The Styles element. Defined during parsing or now.
   def styles
     @styles ||= @root[:styles] || MJML::Element::Styles.new(self, nil, nil)
+  end
+
+  def fonts
+    @fonts ||= @root[:fonts] || MJML::Element::Fonts.new(self, nil, nil)
   end
 
   # The Sections

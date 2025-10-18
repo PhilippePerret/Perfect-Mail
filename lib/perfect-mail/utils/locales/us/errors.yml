@@ -1,0 +1,4 @@
+---
+0: "Fuck, a error…"
+# Fonts
+1000: "Font '%s' should define its URL (`<Font Name>: <Font URL>`)."

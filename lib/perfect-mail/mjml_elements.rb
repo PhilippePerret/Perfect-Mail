@@ -94,7 +94,7 @@ class Element
       @attrs = {}
       return if raw_attrs.nil? || raw_attrs.strip == ''
       raw_attrs.split(';').each do |paire|
-        prop, value = paire.split(/[=:]/).map{|s| s.strip}
+        prop, value = paire.split(/[=:]/,2).map{|s| s.strip}
         @attrs.store(prop.to_sym, value)
       end
     end
@@ -137,6 +137,39 @@ class Element
     def tag; 'head' end
     def root?; true end
   end
+
+  ## ====================================
+  # Class for --- FONTS
+  #
+  class Fonts < AbstractElement
+    def tag; 'fonts' end
+    def root?; true end
+    def addlinable?; true end
+
+    def add_line(line)
+      name, href = line.split(':', 2).map{|s|s.strip}
+      href || raise(Err(1000, [name]))
+      href = "https://#{href}" unless href.start_with?('http')
+      font = Font.new(pmail, name, "href=#{href};")
+      @children << font
+    end
+
+    def to_mjml
+    end
+  end #/ Fonts
+
+  ## ====================================
+  # Class for --- FONT
+  #
+  class Font < AbstractElement
+    def tag; 'font' end
+    def name; value end
+    def href; @href ||= attrs[:href] end
+    def to_mjml
+      ['<mj-font name="%" href="%s" />' % [name, href]]
+    end
+  end
+
 
 
   ## ====================================

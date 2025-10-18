@@ -1,5 +1,6 @@
 require_relative 'utils/string_extension'
 require_relative 'cli'
+require_relative 'utils/msg'
 require_relative 'mjml_elements'
 require_relative 'pmail'
 require_relative 'mjml'

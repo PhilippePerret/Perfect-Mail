@@ -12,6 +12,7 @@ class PMAIL
     'head'      => MJML::Element::Head,
     'section'   => MJML::Element::Section,
     'styles'    => MJML::Element::Styles,
+    'fonts'     => MJML::Element::Fonts,
   }
   KEYWORDS_CONTAINERS = {
     'column'    => MJML::Element::Column,
@@ -38,7 +39,7 @@ class PMAIL
 
 
   def parse(code)
-    @root = {body: nil, head: nil, styles: nil, sections: []}
+    @root = {body: nil, head: nil, styles: nil, fonts: nil, sections: []}
     @current_node     = nil
     @current_section  = nil
 
@@ -65,7 +66,7 @@ class PMAIL
           # Can't become a container node (not the @current_node)
           make_node(KEYWORDS_ELEMENTS[kword], value, attrs)
         elsif @current_node.nil?
-          raise "Any current node. Code should start with body, or styles, or section without leading space."
+          raise "Any current node. Code should start with body, styles, fonts or section word."
         elsif @current_node.addlinable?
           # If one can add line to current node
           @current_node.add_line(line)
