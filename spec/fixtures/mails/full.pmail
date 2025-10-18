@@ -21,3 +21,9 @@ section
     img: images/logo-couleur-moyen.jpg | width:50px;
   column
     t: Et à côté un second paragraphe dans le style "t", pour voir la différence.
+
+section
+  column
+    Ci-contre une image cliquable
+  column
+    img: www.atelier-icare.net/img/atelier/icare/Icare-bigger.png | href=www.atelier-icare.net

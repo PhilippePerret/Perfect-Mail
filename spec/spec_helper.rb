@@ -32,6 +32,11 @@ module SpecsHelper
     File.join('.', 'spec', 'fixtures', relpath)
   end
 
+  def make_pmail_file_with_code(src)
+    path = fixture_path('mails/test.pmail')
+    File.write(path, src)
+    return path
+  end
 end
 
 RSpec.configure do |config|

@@ -20,6 +20,19 @@ class Element
       .prepend(' ')
     end
 
+    # @return formatted attributes for style attribute
+    def self.formatte_attrs_for_style(instance, attrs)
+      return '' if attrs.nil? || attrs.empty?
+      attrs
+      .map do |k, v|
+        k = instance.to_mjml_prop(k)
+        '%s:%s' % [k, v]
+      end
+      .join(';')
+      .prepend(' style="')
+      .concat('"')
+    end
+
     # Parse a raw text line (without leading word)
     def self.parse_content_line(line)
       kword = value = attrs = nil
@@ -348,22 +361,23 @@ class Element
   class Image < AbstractElement
     def tag; 'image' end
 
-    def to_html
-      '<mj-raw><img src="data:image/png;base64,%s"%s></mj-raw>' % [base64_encoded, formatted_attrs]
-    end
-
     def base64_encoded
       require 'base64'
       Base64.strict_encode64(File.binread(ensured_src))
     end
 
+    def img_type
+      @img_type ||= File.extname(src)[1..-1].downcase
+    end
+
     def ensured_src
       @ensured_src ||= begin
-        if distante? then src
+        if src.start_with?('http') then src
         elsif File.exist?(src) then src
         elsif File.exist?(fsrc = pmail.fullpath(src)) then fsrc
         elsif File.exist?(fsrc = File.join(pmail.images_folder, src)) then fsrc
-        else raise(Err(2001, [src]))
+        else # So it's a URL without protocole
+          "https://#{src}"
         end
       end
     end
@@ -378,8 +392,12 @@ class Element
       end
     end
 
+    def to_html
+      '<mj-raw><img src="data:image/%s;base64,%s"%s></mj-raw>' % [img_type, base64_encoded, formatted_attrs]
+    end
+
     def distante?
-      src.start_with?('http')
+      ensured_src.start_with?('http')
     end
   end
 

@@ -52,7 +52,7 @@ class PMAIL
       line = line.strip # not mind indent
       next if line.empty?
       # puts "\nCURRENT LINE : #{line.inspect}"
-      kword, attrs = line.split(' ', 2)
+      kword, attrs = line.splittrim('|', 2)
       if KEYWORDS_ROOT_CONTAINERS[kword]
         @current_node = make_root_node(KEYWORDS_ROOT_CONTAINERS[kword], nil, attrs)
       elsif KEYWORDS_CONTAINERS[kword]
