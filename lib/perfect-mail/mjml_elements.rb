@@ -24,8 +24,8 @@ class Element
     def self.parse_content_line(line)
       kword = value = attrs = nil
       if line.match?(/^([a-z]+)\:/)
-        kword, value = line.split(':', 2).map {|s| s.strip }
-        value, attrs = value.split('|', 2)
+        kword, value = line.splittrim(':', 2)
+        value, attrs = value.splittrim('|', 2)
         # If kword is not a known keywords, it's the name of a class
         unless PMAIL::KEYWORDS_ELEMENTS[kword] || PMAIL::KEYWORDS_ROOT_CONTAINERS[kword] || PMAIL::KEYWORDS_CONTAINERS[kword]
           if attrs.nil?
@@ -97,6 +97,10 @@ class Element
         prop, value = paire.split(/[=:]/,2).map{|s| s.strip}
         @attrs.store(prop.to_sym, value)
       end
+    end
+
+    def formatted_attrs
+      AbstractElement.formate_attrs(self, attrs)
     end
 
     # Short CSS prop to real one
@@ -320,7 +324,7 @@ class Element
     def to_mjml
       return [
         '<mj-text%s>%s</mj-text>' % [
-          AbstractElement.formate_attrs(self, attrs), 
+          formatted_attrs,
           formate(value)
         ]
       ]
@@ -345,21 +349,37 @@ class Element
     def tag; 'image' end
 
     def to_html
-      '<img src="data:image/png;base64,%s">' % [base64_encoded]
+      '<mj-raw><img src="data:image/png;base64,%s"%s></mj-raw>' % [base64_encoded, formatted_attrs]
     end
 
     def base64_encoded
-      Base64.strict_encode64(File.binread(src))
+      require 'base64'
+      Base64.strict_encode64(File.binread(ensured_src))
     end
 
-    def src; @src ||= attrs[:src] end
+    def ensured_src
+      @ensured_src ||= begin
+        if distante? then src
+        elsif File.exist?(src) then src
+        elsif File.exist?(fsrc = pmail.fullpath(src)) then fsrc
+        elsif File.exist?(fsrc = File.join(pmail.images_folder, src)) then fsrc
+        else raise(Err(2001, [src]))
+        end
+      end
+    end
+    def src; @src ||= value end
     def href; @href ||= attrs[:href] end
     def to_mjml
-      if File.size(src) > 30_000
-        ['<mj-image src="%s" %s/>' % [src, attrs]]
+      # if File.size(ensured_src) > 30_000
+      if distante?
+        ['<mj-image src="%s"%s/>' % [ensured_src, formatted_attrs]]
       else
         [to_html]
       end
+    end
+
+    def distante?
+      src.start_with?('http')
     end
   end
 
@@ -371,7 +391,7 @@ class Element
 
     def href; @href ||= attrs[:href] end
     def to_mjml
-      ['<mj-button href="%s" %s>%s</mj-button>' % [href, attrs, value]]
+      ['<mj-button href="%s"%s>%s</mj-button>' % [href, formatted_attrs, value]]
     end
   end
 

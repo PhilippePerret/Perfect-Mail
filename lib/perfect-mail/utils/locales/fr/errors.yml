@@ -2,3 +2,5 @@
 0: "Merde, une erreur…"
 # Fontes
 1000: "La fonte '%s' doit définir son URL (`<Font Name>: <Font URL>`)."
+# Images
+2001: "L'image définie par '%s' est introuvable, en tant que path, dans le dossier contenant le fichier pmail ou dans un dossier images défini explicitement."

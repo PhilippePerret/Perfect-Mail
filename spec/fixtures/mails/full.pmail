@@ -1,0 +1,23 @@
+/*
+Mail with all the features
+*/
+fonts
+  Raleway: fonts.googleapis.com/css?family=Raleway
+  Charter: www.atelier-icare/fonts/Charter/Charter Regular
+
+styles
+  n: font:Charter; size:15pt; 
+  t: font:Raleway; size:11pt;
+
+/*
+
+    CONTENU DU MAIL
+
+*/
+section
+  column
+    n:Un premier paragraphe dans le style "n", c'est-à-dire "normal".
+  column | align: center;
+    img: images/logo-couleur-moyen.jpg | width:50px;
+  column
+    t: Et à côté un second paragraphe dans le style "t", pour voir la différence.

@@ -25,7 +25,18 @@ Aruba.configure do |config|
   config.command_search_paths = [File.absolute_path("#{__dir__}/../bin")]
 end
 
+# Custom Test Methods
+module SpecsHelper
+
+  def fixture_path(relpath)
+    File.join('.', 'spec', 'fixtures', relpath)
+  end
+
+end
+
 RSpec.configure do |config|
+
+  config.include SpecsHelper
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.
@@ -109,4 +120,5 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
+
 end

@@ -8,8 +8,8 @@ module PerfectMail
       #
       # Méthode qui transforme un code au format pmail
       # en code au format MJML
-      def pmail2mjml(code)
-        pmail = PMAIL.new(code)
+      def pmail2mjml(code, builder = nil)
+        pmail = PMAIL.new(code, builder)
         lines = ['<mjml>']
         lines += pmail.head2mjml if pmail.head?
         lines << pmail.body2mjml

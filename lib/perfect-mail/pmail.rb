@@ -8,6 +8,9 @@ class PMAIL
 
   end #/class << self
 
+  # The Builder, if any
+  attr_reader :builder
+
   # Provided code (pmail)
   attr_reader :raw_code
   # Pmail Code Tree
@@ -15,7 +18,8 @@ class PMAIL
 
   ##
   # Instanciation avec le code brut du fichier .pmail
-  def initialize(code)
+  def initialize(code, builder = nil)
+    @builder = builder
     @raw_code = code
     parse(code)
   end
@@ -63,6 +67,27 @@ class PMAIL
   # The Sections
   def sections
     @sections ||= root[:sections]
+  end
+
+  # @return absolute path of +relative_path+ in folder's file (if any
+  # — otherwise in current folder)
+  def fullpath(relative_path)
+    File.join(folder, relative_path)
+  end
+
+  # Images folder (implicite or explicite)
+  def images_folder
+    @images_folder ||= File.join(folder, 'images')
+  end
+
+  # Texts folder (implicite or explicite)
+  def texts_folder
+    @texts_folder ||= File.join(folder, 'texts')
+  end
+
+  # If there's a builder, there's a folder (for images, etc.)
+  def folder
+    @folder ||= if builder.nil? then File.absolute_path('.') else builder.folder end
   end
 
 end #/class PMAIL

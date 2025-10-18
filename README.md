@@ -75,6 +75,31 @@ section |background-color:whitegrey;
 Un mail définit plusieurs sections avec le mot-clé `section`.
 
 
+<a name="define-fonts"></a>
+
+### Définir les fontes
+
+Il faut bien considérer, pour commencer, que la fonte à utiliser doit se trouver sur le web, pas localement, sauf si elle est définie dans un fichier `.css` par un `@font-face`.
+
+Les fontes se définissent alors dans la section `fonts` du fichier `.pmail` : 
+
+~~~pmail
+fonts
+	// Ici la définition des fontes
+~~~
+
+Une fonte se définit alors tout simplement par son nom (celui qui sera utilisé ici, peu importe ce qu’il est) et l’URL de la police. Par exemple : 
+
+~~~pmail
+fonts
+	Rale: https:fonts.googleapis.com/css?family=Raleway
+~~~
+
+> On peut omettre le ‘http:’ pour la brièveté.
+
+Pour aller plus loin, voir [comment utiliser la fonte par le style](#use-font-in-style).
+
+<a name="define-styles"></a>
 
 ### Définition des styles
 
@@ -86,6 +111,67 @@ styles
 	psmall: size:11pt;
 	
 ~~~
+
+<a name="use-font-in-style"></a>
+
+#### Utiliser une fonte par le style
+
+Une fois que la [fonte est définie](#define-fonts), on peut l'utiliser dans le style défini :
+
+~~~pmail
+styles
+	p: font:Rale; color:red;
+~~~
+
+<a name="images"></a>
+
+## Les images
+
+Le code PMAIL permet deux utilisations  « out of the box » :
+
+* l’utilisation d’[images distantes](#images-distantes) (recommandé),
+* l’utilisation d’[images locales](#images-locales) (si petites — logo, etc.,
+
+<a name="images-distantes"></a>
+
+### Images distantes
+
+Les images distantes se définissent simplement par : 
+
+~~~pmail
+img: <URL de l'imge> | <attributs optionnels>
+~~~
+
+Par exemple : 
+
+~~~pmail
+img: www.monsite.net/images/limage.jpg | width: 120px;
+~~~
+
+
+
+
+<a name="images-locales"></a>
+
+### Images locales
+
+Pour les images locales, il vaut mieux qu’elles soient inférieures à 100 ko sous peine de trop alourdir le mail envoyé. Car pour fonctionner — le destinataire ne possédant pas cette image —, on doit la charger « en dur » à l’intérieur du mail.
+
+Pour un mail plus alléger et rapide, déposer plutôt l’image quelque part sur la toile et préciser son URL en valeur.
+
+### Rejoindre une cible en cliquant sur l’image
+
+Pour pouvoir rejoindre une cible en cliquant sur l’image, il suffit d’ajouter en attributs l’attribut `href:` ou `href=` suivi de l’URL. Par exemple : 
+
+~~~pmail
+img: www.site.com/image.jpg | href=www.site.com
+~~~
+
+> Vous notez que le protocole (https) n’est pas nécessaire, il est ajouté automatiquement par PMail.
+
+
+
+---
 
 ### Séparateurs d’attributs
 

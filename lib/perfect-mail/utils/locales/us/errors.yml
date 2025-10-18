@@ -2,3 +2,5 @@
 0: "Fuck, a error…"
 # Fonts
 1000: "Font '%s' should define its URL (`<Font Name>: <Font URL>`)."
+# Images
+2001: "Image defined by '%s' is unfound, as a path, nor in the pmail file folder, nor in a explicitaly defined images folder."

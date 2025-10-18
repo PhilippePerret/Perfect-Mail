@@ -19,16 +19,16 @@ class Builder
     create_mjml_file
     producte_html_code
     put_code_in_clipboard
-    puts "Code construit avec succès. Colle-le quelque part".green
+    puts Msg(1).green
     if options[:mail_app]
       produce_mail_app_mail
-      puts "Mail pour Mail.app construit avec succès".green
+      puts Msg(2).green
       `open -a Mail.app "#{eml_path}"`
     end
   end
 
   def create_mjml_file
-    File.write(mjml_path, MJML.pmail2mjml(File.read(pmail_path)))
+    File.write(mjml_path, MJML.pmail2mjml(File.read(pmail_path), self))
   end
 
   def producte_html_code
@@ -75,7 +75,7 @@ class Builder
   end
 
   def folder
-    @folder ||= File.dirname(pmail_path)
+    @folder ||= File.absolute_path(File.dirname(pmail_path))
   end
 
 end #/class Builder

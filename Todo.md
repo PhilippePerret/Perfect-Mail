@@ -1,6 +1,10 @@
 # Todo
 
-- [ ] Revoir le `add_line` qui est mieux que la nouvelle méthode car la ligne doit être traitée différemment en fonction du container.
+- [ ] Définition du sujet du mail par le title (on peut mettre aussi « sujet » ou « subject »)
+- [ ] Gérer les inclusions (de n’importe quoi)
+- [ ] Pouvoir définir le dossier des images (images_folder) + documenter
+- [ ] Pouvoir définir le dossier des textes (texts_folder) + documenter
+- [x] Revoir le `add_line` qui est mieux que la nouvelle méthode car la ligne doit être traitée différemment en fonction du container.
 - [x] Revoir le parsing, il n'est pas bon du tout… Alors que c'est simple. Par exemple, dès qu'on est dans les lignes d'une section, soit on a une colonne, soit on a un identifier qui peut être :
   - une image (img:)
   - un text (par défaut ou txt:)
@@ -11,8 +15,8 @@
   Pour une image, `<contenu>` est le chemin d'accès à l'image, pour un texte, c'est le texte
   Et les attributs sont toujours les attributs.
   Basta, ça ne devrait pas être aussi compliqué.
-- [ ] Définition des textes multilines
-- [ ] Gérer l'importation de fontes.
+- [x] Définition des textes multilines
+- [x] Gérer l'importation de fontes.
 - [ ] Gérer la possibilité d'importer du code MJML ou HTML
 - [ ] Développer la possibilité d'écrire en markdown
 - [ ] Prendre en compte tous les attributs, en "réduisant" ceux qu'on peut réduire
