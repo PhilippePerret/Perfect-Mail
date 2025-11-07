@@ -72,6 +72,41 @@ section |background-color:whitegrey;
 
 ## Mode d’emploi
 
+**Perfect-Mail** (PMail) permet de définir un mail avec un code simplissime et de le mettre en forme avec **[MJML](https://mjml.io)** pour qu’il s’adapte à tous les gestionnaires de mail.
+
+Au minimum, le code `pmail` peut ressembler à : 
+
+~~~pmail
+section
+	Ceci est le corps du message qui s'affichera correctement quelque soit le gestionnaire de mails du destinataire, sur un mobile, une tablette ou un ordinateur de bureau.
+~~~
+
+Et au maximum, on pourra définir des styles de paragraphes, des colonnes, des images, des boutons, des accordéons et des kaléïdoscopes, tout ce que MJML permet de faire, et même plus.
+
+Voici par exemple un code beaucoup plus complexe et, dessous, le mail qu’il produit dans le gestionnaire `Mail.app` d’un ordinateur de bureau Apple.
+
+~~~pmail
+fonts
+	Charter: www.atelier-icare.net/fonts/Charter/Charter Regular.ttf
+	
+styles
+	n: font:Charter; size:15pt;
+	p: font:Charter; size:11pt;
+	
+section
+	column
+		n: Un paragraphe sur la première colonne, à gauche.
+	column
+		p: Un paragraphe écrit plus petit, sur la colonne du milieu. En cliquant sur l'image ci-contre, on rejoint l'atelier.
+	column
+		img: www.atelier-icare.net/img/logo.jpg | href=www.atelier-icare.net
+		
+section
+	p: Une petite note tout en bas.
+~~~
+
+
+
 Un mail définit plusieurs sections avec le mot-clé `section`.
 
 
@@ -167,7 +202,7 @@ Pour pouvoir rejoindre une cible en cliquant sur l’image, il suffit d’ajoute
 img: www.site.com/image.jpg | href=www.site.com
 ~~~
 
-> Vous notez que le protocole (https) n’est pas nécessaire, il est ajouté automatiquement par PMail.
+> Vous notez que le protocole (https) n’est pas nécessaire, il est ajouté automatiquement par Perfect-Mail.
 
 
 
