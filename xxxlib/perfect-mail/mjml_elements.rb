@@ -33,20 +33,27 @@ class Element
       .concat('"')
     end
 
-    # Parse a raw text line (without leading word)
-    def self.parse_content_line(line)
+    STYLE_REG = /^((?:[a-zA-Z0-9_]+?\:)+)(.+)$/.freeze
+
+    # Parse a raw text line
+    # (toutes les lignes passent ici au départ, pas seulement les
+    #  lignes de texte)
+    #
+    # Attention, on passe par ici aussi bien avec une ligne de texte
+    # que pour une définition de style (ce qui pose quand même 
+    # problème…). Maintenant on peut le faire avec +current_node+
+    # current_node[:tag] = "styles" quand on est dans la définition
+    # des styles.
+    # 
+    def self.parse_content_line(line, current_node = nil)
+      # puts "\n[parse_content_line] line: #{line.inspect} (current_node: #{current_node.inspect})"
       kword = value = attrs = nil
-      if line.match?(/^([a-z]+)\:/)
+      if line.match?(/^([a-z]+)\:/) && !line.start_with?('http')
         kword, value = line.splittrim(':', 2)
         value, attrs = value.splittrim('|', 2)
         # If kword is not a known keywords, it's the name of a class
         unless PMAIL::KEYWORDS_ELEMENTS[kword] || PMAIL::KEYWORDS_ROOT_CONTAINERS[kword] || PMAIL::KEYWORDS_CONTAINERS[kword]
-          if attrs.nil?
-            attrs = ''
-          elsif !attrs.end_with?(';')
-            attrs += ';'
-          end
-          attrs += "style:#{kword};"
+          return parse_content_line_of_text(line, current_node = nil)
         end
       else
         value = line.strip
@@ -54,6 +61,33 @@ class Element
       [kword, value, attrs]
     end
 
+    def self.parse_content_line_of_text(line, current_node = nil)
+      # puts "\n[parse_content_line_of_text] line: #{line.inspect} (current_node: #{current_node.inspect})"
+      kwords = value = attrs = nil
+      if line.match?(STYLE_REG)
+        kwords, value = line.scan(STYLE_REG)[0]
+        kwords = kwords[0..-2].split(':')
+          .reject { |kword| known_keyword?(kword) }
+          .join(' ')
+        value, attrs = value.splittrim('|', 2)
+        # If kword is not a known keywords, it's the name of a class
+        unless kwords == ''
+          if attrs.nil?
+            attrs = ''
+          elsif !attrs.end_with?(';')
+            attrs += ';'
+          end
+          attrs += "style:#{kwords};"
+        end
+      else
+        value = line.strip
+      end
+      [kwords, value, attrs]
+    end
+
+    def self.known_keyword?(kword)
+      PMAIL::KEYWORDS_ELEMENTS[kword] || PMAIL::KEYWORDS_ROOT_CONTAINERS[kword] || PMAIL::KEYWORDS_CONTAINERS[kword]
+    end
 
     # {PerfectMail::PMail} instance
     attr_reader :pmail
@@ -127,8 +161,9 @@ class Element
       when 'style' then 'mj-class'
       when 'size', 'fsize' then 'font-size'
       when 'font', 'ffamily', 'family' then 'font-family'
-      when 'align' then 'text-align'
+      # when 'align' then 'text-align' # ne fonctionne pas en tout cas pour column
       when 'bgcolor' then 'background-color'
+      when 'weight' then 'font-weight'
       when 'bg' then 'background'
       else prop
       end
@@ -279,11 +314,16 @@ class Element
     def to_mjml
       # puts "-> Section.to_mjml avec #{columns.count} colonnes."
       [
-        '<mj-section>',
+        entete_mjml,
         children.map {|c| c.to_mjml },
         '</mj-section>'
       ].flatten
     end
+
+    def entete_mjml
+      '<mj-section%s>' % [AbstractElement.formate_attrs(self, attrs)]
+    end
+
   end
 
   ## ====================================

@@ -4,6 +4,7 @@ Module principal qui construit le fichier HTML à partir
 du fichier .pmail
 
 =end
+
 module PerfectMail
 class Builder
 
@@ -18,6 +19,7 @@ class Builder
     @options = options
     create_mjml_file
     producte_html_code
+    affine_html_code # <=== AJOUTÉ POUR FAIRE DES MINICORRECTIONS DE FIN
     put_code_in_clipboard
     puts Msg(1).green
     if options[:mail_app]
@@ -25,6 +27,30 @@ class Builder
       puts Msg(2).green
       `open -a Mail.app "#{eml_path}"`
     end
+  end
+
+
+  def affine_html_code
+    code_ini = IO.read(html_path)
+    puts "code_ini:\n#{code_ini}"
+    code_ini.match?(/<td/) || raise("Ne contient pas <td")
+    code_ini.match?(/padding:/) || raise("Ne contient pas padding:")
+    code_ini.match?(/<td(.+?)padding\: ?/) || raise("ne contient pas l'expression")
+    code = code_ini.to_str
+      .gsub(/<td(.+?)padding\: ?20px/, '<td\1padding: 4px')
+      .gsub(/<td(.+?)padding\: ?10px/, '<td\1padding: 2px')
+    if code == code_ini
+      puts "Aucune correction"
+      exit 1
+    end
+    if File.exist?(remp_path)
+      require remp_path
+      REMPLACEMENTS.each do |search, remp|
+        code = code.gsub(search, remp)
+      end
+    end
+
+    IO.write(html_path, code)
   end
 
   def create_mjml_file
@@ -55,6 +81,10 @@ class Builder
     IO.popen('pbcopy', 'w') { |f| f << File.read(html_path) }
   end
 
+  # Fichier contenant les remplacements à faire
+  def remp_path
+    @remp_path ||= File.join(folder, 'remplacements.rb')
+  end
 
   def mjml_path
     @mjml_path ||= File.join(folder, "#{root}.mjml")

@@ -1,5 +1,14 @@
 # Perfect-Mail
 
+## Quick help
+
+* Write your `.pmail`'s file (cf. below),
+* open a Terminal at its folder,
+* run `pmail -c ./your-pmail-file.pmail`,
+* paste the HTML code in your mail,
+* That's it!
+
+
 ## Overview
 
 This command-line application takes a text like:

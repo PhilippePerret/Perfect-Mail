@@ -60,7 +60,7 @@ class PMAIL
         @current_node = make_node(KEYWORDS_CONTAINERS[kword], nil, attrs)
       else
         # Contained Element
-        kword, value, attrs = parse_content_line(line)
+        kword, value, attrs = parse_content_line(line, @current_node)
         if KEYWORDS_ELEMENTS[kword]
           # New node
           # Can't become a container node (not the @current_node)
@@ -84,8 +84,8 @@ class PMAIL
   # @return [{String} kword, {String|Nil} value, {String | Nil} attrs]
   #
   # If line is raw text, kword is value.
-  def parse_content_line(line)
-    MJML::Element::AbstractElement.parse_content_line(line)
+  def parse_content_line(line, current_section = nil)
+    MJML::Element::AbstractElement.parse_content_line(line, current_section)
   end
 
   def make_root_node(node_klass, value, attrs)

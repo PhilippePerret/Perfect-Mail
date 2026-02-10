@@ -75,4 +75,53 @@ describe "The parser" do
     expect(actual.strip).to eq(mjml.strip)
   end
 
+  it "can treate several styles in paragraph" do
+
+    src = <<~PMAIL
+    styles
+      p: color:blue; size:12pt;
+      it: font-style:italic;
+      bo: weight:bold;
+    section
+      column
+        p:it:bo:Ceci est un texte dans tous les styles.
+    PMAIL
+
+    mjml = <<~MJML.gsub(/^\s+/,'')
+    <mjml>
+      <mj-head>
+        <mj-attributes>
+          <mj-class name="p" color="blue" font-size="12pt" />
+          <mj-class name="it" font-style="italic" />
+          <mj-class name="bo" font-weight="bold" />
+        </mj-attributes>
+      </mj-head>
+      <mj-body>
+        <mj-section>
+          <mj-column>
+            <mj-text mj-class="p it bo">Ceci est un texte dans tous les styles.</mj-text>
+          </mj-column>
+        </mj-section>
+      </mj-body>
+    </mjml>
+    MJML
+
+    actual = MJML.pmail2mjml(src)
+    # puts "actual: \n#{actual}"
+
+    expect(actual.strip).to eq(mjml.strip)
+
+  end
+
+  it "c'est toujours le dernier style qui gagne" do 
+    # Là, je pense qu'il faut le faire par une image, avec deux tailles
+    # réellement différentes.
+    # TODO
+  end
+
+  it "On ne peut pas utiliser un mot réservé comme non de style" do
+    # Ce nom disparaitra tout simplement de la liste des styles.
+    # TODO
+  end
+
 end

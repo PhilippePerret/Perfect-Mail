@@ -2,7 +2,11 @@ class String
 
   # Split with no leading or ending spaces
   def splittrim(delimitor, count = nil)
-    self.split(delimitor, count).map { |s| s.strip }
+    if count.nil?
+      self.split(delimitor).map { |s| s.strip }
+    else
+      self.split(delimitor, count).map { |s| s.strip }
+    end
   end
 
   def blue

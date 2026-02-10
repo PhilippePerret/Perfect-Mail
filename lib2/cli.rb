@@ -7,13 +7,13 @@ module PerfectMail
       attr_reader :arguments
       
       def run(args)
-        puts "-> CLI.run"
+        # puts "-> CLI.run"
         if args.empty?
           show_mini_help
         else
           traite_args(args)
-          if File.exist?(command) # La commande est en fait un fichier à traiter
-            Builder.new(command).build(options)
+          if File.exist?(command) # La commande est en fait le path du fichier à traiter
+            MJMLDealer.treate(command)
           else
             puts "Je ne sais pas encore traiter #{command}.".red
           end
