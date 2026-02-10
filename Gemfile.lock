@@ -37,6 +37,8 @@ GEM
     cucumber-messages (27.2.0)
     cucumber-tag-expressions (8.0.0)
     diff-lcs (1.6.2)
+    erb (5.1.1)
+    fastimage (2.4.0)
     ffi (1.17.2-arm64-darwin)
     logger (1.7.0)
     memoist3 (1.0.0)
@@ -60,6 +62,7 @@ GEM
       ffi (~> 1.1)
       memoist3 (~> 1.0.0)
     thor (1.4.0)
+    tsort (0.2.0)
     yaml (0.4.0)
 
 PLATFORMS
@@ -67,8 +70,11 @@ PLATFORMS
 
 DEPENDENCIES
   aruba
+  erb (= 5.1.1)
+  fastimage
   rspec
   stringio (= 3.1.7)
+  tsort (= 0.2.0)
   yaml (= 0.4.0)
 
 RUBY VERSION

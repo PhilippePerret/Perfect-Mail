@@ -6,5 +6,8 @@ group :development, :test do
   gem 'aruba'
 end
 
+gem "fastimage"
 gem 'stringio', '3.1.7'
 gem 'yaml', '0.4.0'
+gem 'tsort', '0.2.0'
+gem 'erb', '5.1.1'

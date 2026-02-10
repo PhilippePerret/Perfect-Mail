@@ -55,6 +55,21 @@ all prop:value;prop:value…;prop:value;
 
 Les définitions s’appliqueront par défaut à tous les composants, qui pourront cependant être rectifiés au détail.
 
+Attention, cela concerne vraiment TOUS les composants. C’est-à-dire que si l’on règle : 
+
+~~~pmail
+all align:justify;
+~~~
+
+… tous les éléments seront vraiment justifiés et il sera difficile, même avec `align: center;` de les centrer (à vérifier, mais ça se produit avec des images centrées dans des colonnes par : 
+
+~~~pmail
+column | align:center;
+	img path/to/mon/image.jpg
+~~~
+
+… même si le programme râle que `column` ne supporte pas le paramètre `align`.
+
 ---
 
 <a name="classes"></a>

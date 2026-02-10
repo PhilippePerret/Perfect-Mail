@@ -9,12 +9,20 @@ Sans passer par autre chose.
   MJMLDealer.treate(path/to/file)
 
 =end
+require "fastimage"
 
 class MJMLDealer
 
   def self.treate(path)
     dealer = MJMLDealer.new(path)
     dealer.treate
+    put_code_in_clipboard(dealer)
+  end
+
+
+  def self.put_code_in_clipboard(dealer)
+    IO.popen('pbcopy', 'w') { |f| f << File.read(dealer.html_path) }
+    puts "Le code HTML a été mis dans le presse-papier. Vous pouvez le coller dans le formulaire Brevo par exemple.".vert
   end
 
   attr_reader :path, :mjml_code
@@ -109,9 +117,9 @@ class MJMLComposer
       if item.is_a?(String)
         code << item
       elsif item[:type] == :section
-        code << '<mj-section>'
+        code << ('<mj-section%s>' % [item[:attrs]])
         item[:columns].each do |column|
-          code << '<mj-column>'
+          code << ('<mj-column%s>' % [column[:attrs]])
           column[:items].each { |item| code << item }
           code << '</mj-column>'
         end
@@ -160,39 +168,42 @@ class MJMLParser
       line = line.strip
       next if line.empty? || line.start_with?('# ')
       first_word, value = line.splittrim(' ', 2)
+      value, attrs      = decompose_value_and_attributes(value || '')
+
+      # Débug
+      # puts "========\nfirst_word: #{first_word.inspect}\nvalue: #{value.inspect}\nattrs: #{attrs.inspect}\n========="
+      # /DÉBUG
+
       case first_word
       when 'section'
         @current_section = {type: :section, columns: []}
         table[:body] << @current_section
         @current_column = nil
       when 'column'
-        make_current_column
+        make_current_column(attrs)
       when 'text'
-        make_current_column if @current_column.nil?
-        @current_column[:items] << ('<mj-text>%s</mj-text>' % [value])
+        traite_texte(value, attrs)
       when 'img'
         make_current_column if @current_column.nil?
-        @current_column[:items] << traite_image(value)
+        @current_column[:items] << traite_image(value, attrs)
       when 'font'
         name, href = value.splittrim(' ', 2)
         href = "https://#{href}" unless href.start_with?('http')
         table[:head] << ('<mj-font name="%s" href="%s" />' % [name, href])
       when 'title'
-        table[:head] << ('<mj-title>%s</mj-title>' % [value])
+        table[:head] << ('<mj-title%s>%s</mj-title>' % [attrs, value])
       when 'preview'
-        table[:head] << ('<mj-preview>%s</mj-preview>' % [value])
+        table[:head] << ('<mj-preview%s>%s</mj-preview>' % [attrs, value])
       when 'all'
-        table.store(:all, '<mj-all %s />' % [value_to_attrs(values)])
+        table.store(:all, '<mj-all%s />' % [css_attributes_to_mjml_attributes(value)])
       when 'class'
         name, attrs = value.splittrim(' ', 2)
-        table[:class] << ('<mj-class name="%s" %s />' % [name, value_to_attrs(attrs)])
+        table[:class] << ('<mj-class name="%s" %s />' % [name, css_attributes_to_mjml_attributes(attrs)])
       when 'breakpoint'
-        table[:head] << ('<mj-breakpoint width="%s" />' % [value])
+        table[:head] << ('<mj-breakpoint%s width="%s" />' % [attrs, value])
       else
         # Si ça ne répond à rien, c'est un texte
-        make_current_column if @current_column.nil?
-        value = "#{first_word} #{value}"
-        @current_column[:items] << ('<mj-text>%s</mj-text>' % [value])
+        traite_texte("#{first_word} #{value}", attrs)
       end
     end
 
@@ -200,17 +211,44 @@ class MJMLParser
   end #/parse
 
 
-  def make_current_column
-    @current_column = {type: :column, items: []}
+  def make_current_column(attrs = '')
+    # puts "-> make_current_column / attrs = #{attrs}".blue
+    @current_column = {type: :column, items: [], attrs: attrs}
     @current_section[:columns] << @current_column
+  end
+
+  REG_CLASS = /^([a-zA-Z0-9_\-\:]+): /.freeze
+  def traite_texte(str, attrs)
+    make_current_column if @current_column.nil?
+    if str.match?(REG_CLASS)
+      classes = nil
+      str = str.gsub(REG_CLASS) {
+        classes = $1.freeze.split(':')
+        ''
+      }
+      attrs += ' css-class="%s"'.freeze % classes.join(' ')
+    end
+    @current_column[:items] << ('<mj-text%s>%s</mj-text>' % [attrs, Formater.text(str)])
   end
 
   # Traite le code d'une image, c'est-à-dire, précisément, ce qui se
   # trouve après le 'img ' dans le code pmail
   # Comme tout élément, elle peut posséder des caractéristiques
-  def traite_image(code)
-    src, attrs = decompose_value_and_attributes(code)
+  def traite_image(src, attrs)
+    # ⚠️ Si les attributs définissent la hauteur (height) mais pas la
+    #    largeur, il faut la calculer pour la forcer
     src = "https://#{src}"
+    if (attrs.match?(/height="/) && !attrs.match?(/width="/))
+      height = attrs.match(/height="(.+?)px"/)[1].to_i
+      rwidth, rheight = FastImage.size(src, raise_on_failure: true)
+      if rwidth.nil? || rheight.nil?
+        puts "L'image #{src} semble introuvable…".red
+      else
+        ratio = rwidth.to_f / rheight
+        width = (ratio * height).round
+        attrs += " width=\"#{width}px\""
+      end
+    end
     ('<mj-image src="%s"%s />' % [src, attrs])
   end
 
@@ -219,8 +257,9 @@ class MJMLParser
   # en attributs pour la balise. Par exemple, "width:200px" sera 
   # transformé en ' width="200px"'
   def decompose_value_and_attributes(code)
-    return [code, ''] unless code.match?(' \| ')
-    code, attrs = code.splittrim(' | ')
+    # puts "-> decompose_value_and_attributes(code = #{code.inspect})".blue
+    return [code, ''] unless code.match?('\|')
+    code, attrs = code.splittrim('|')
     [code, css_attributes_to_mjml_attributes(attrs)]
   end
 
@@ -234,9 +273,12 @@ class MJMLParser
 
 
   PROP2ATTR = {
+    'font'        => 'font-family',
     'size'        => 'font-size',
     'style'       => 'font-style',
-    'background'  => 'background-color'
+    'weight'      => 'font-weight',
+    'background'  => 'background-color',
+    'bg'  => 'background-color'
   }
 
 end # class MJMLParser
